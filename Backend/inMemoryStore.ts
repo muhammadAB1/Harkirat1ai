@@ -36,7 +36,7 @@ export class inMemoryStore {
     }
 
     get(conversationId: string): Message[]{
-        return this.store[conversationId].messages ?? []
+        return this.store[conversationId]?.messages ?? []
     }
 
     add(converstaionId: string, message: Message) {

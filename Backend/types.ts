@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 const MAX_INPUT_TOKENS = 1000
-export const SUPPORTER_MODELS = ['openai/gpt-4o', 'openai/gpt-5'];
+export const SUPPORTER_MODELS = ['openai/gpt-oss-20b:free', 'google/gemini-2.0-flash-exp:free'];
 export type MODEL = typeof SUPPORTER_MODELS[number]
 
 export const CreatedChatType = z.object({
