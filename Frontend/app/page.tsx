@@ -1,26 +1,29 @@
-import { useEffect } from "react"
+"use client"
+import { useEffect } from "react";
 
-const BACKEND_URL = 'http://localhost:3000'
+const BACKEND_URL = 'http://localhost:5000'
 
-function App() {
+export default function Home() {
 
   useEffect(() => {
+
     const makeRequest = async () => {
       const response = await fetch(`${BACKEND_URL}/chat`, {
         method: 'POST',
         headers: {
-          'content-type': "application/json"
+          'content-type': 'application/json'
         },
         body: JSON.stringify({
-          message: "what is 2 + 2",
-          model: "openai/gpt-oss-20b:free"
+          'message': 'What is 2 + 2 just write the answer',
+          'model': 'deepseek/deepseek-chat-v3.1:free'
         })
       })
 
       if (!response.body) {
-        console.error('No response body');
+        console.error('No response body')
         return
       }
+
       const reader = response.body.getReader()
       const decoder = new TextDecoder();
 
@@ -33,29 +36,23 @@ function App() {
             break;
           }
 
-          const chunk = decoder.decode(value, { stream: true });
-          console.log('Recieved chunk:', chunk)
-        }
+          const chunk = decoder.decode(value, { stream: true })
+          console.log('Received chunk:', chunk)
 
+        }
       } catch (error) {
         console.error('Error reading stream:', error)
       }
-
-      finally{
+      finally {
         reader.releaseLock()
       }
-
     }
-
     makeRequest();
-
   }, [])
 
   return (
     <div className="">
-      hi
+      Hi
     </div>
-  )
+  );
 }
-
-export default App
