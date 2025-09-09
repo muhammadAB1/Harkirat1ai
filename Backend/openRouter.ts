@@ -1,7 +1,5 @@
 import { Message, MODEL } from "./types.js";
 
-
-const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY
 const MAX_TOKENS_ITERATIONS = 1000;
 
 export const createCompletion = async (messages: Message[],
@@ -10,15 +8,16 @@ export const createCompletion = async (messages: Message[],
 ) => {
 
     return new Promise<void>(async (resolve, reject) => {
+
         const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
             method: 'POST',
             headers: {
-                Authorization: `Bearer ${OPENROUTER_API_KEY}`,
+                Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
                 model,
-                messages: [{ role: 'user', content: messages }],
+                messages: messages,
                 stream: true,
             }),
         });
@@ -44,12 +43,10 @@ export const createCompletion = async (messages: Message[],
 
                 // Append new chunk to buffer
                 buffer += decoder.decode(value, { stream: true });
-
                 // Process complete lines from buffer
                 while (true) {
                     const lineEnd = buffer.indexOf('\n');
                     if (lineEnd === -1) {
-                        resolve()
                         break
                     };
 
@@ -62,6 +59,7 @@ export const createCompletion = async (messages: Message[],
 
                         try {
                             const parsed = JSON.parse(data);
+                            console.log(parsed.choices[0].delta.content)
                             const content = parsed.choices[0].delta.content;
                             if (content) {
                                 cb(content)
@@ -74,6 +72,7 @@ export const createCompletion = async (messages: Message[],
                 }
             }
         } finally {
+            resolve()
             reader.cancel();
         }
 
