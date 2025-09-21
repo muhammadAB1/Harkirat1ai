@@ -12,7 +12,11 @@ const router = Router();
 router.get('/conversations', authMiddleware, async (req, res) => {
     const userId = req.userId
     const conversations = await prismaClient.conversation.findMany({
-        where: { userId: userId }
+        where: { userId: userId },
+        orderBy: {
+            title: 'desc'
+        }
+
     })
 
     res.json({
@@ -48,8 +52,8 @@ router.post('/chat', authMiddleware, async (req, res) => {
 
     const userId = req.userId;
     const { success, data } = CreatedChatType.safeParse(req.body);
-    const newUuid = crypto.randomUUID();
-    const conversationId = data?.conversationId ?? newUuid
+    // const newUuid = crypto.randomUUID();
+    // const conversationId = data?.conversationId ?? newUuid
     if (!success) {
         res.status(411).json({
             message: 'Incorrect inputs'
@@ -58,22 +62,22 @@ router.post('/chat', authMiddleware, async (req, res) => {
         return
     }
 
-    let existingMessages = inMemoryStore.getInstance().get(conversationId)
+    let existingMessages = inMemoryStore.getInstance().get(data.conversationId)
 
     if (!existingMessages.length) {
         const messages = await prismaClient.message.findMany({
             where: {
-                conversationId
+                conversationId: data.conversationId
             }
         })
 
         messages.map((m) => {
-            inMemoryStore.getInstance().add(conversationId, {
+            inMemoryStore.getInstance().add(data.conversationId, {
                 role: m.role as Role,
                 content: m.content
             })
         })
-        existingMessages = inMemoryStore.getInstance().get(conversationId)
+        existingMessages = inMemoryStore.getInstance().get(data.conversationId)
     }
 
     res.setHeader('Cache-Control', 'no-cache');
@@ -91,22 +95,28 @@ router.post('/chat', authMiddleware, async (req, res) => {
         message += chunk
         res.write(chunk);
     })
+    res.end();
 
-    inMemoryStore.getInstance().add(conversationId, {
+    inMemoryStore.getInstance().add(data.conversationId, {
         role: Role.user,
         content: data.message
     })
 
-    inMemoryStore.getInstance().add(conversationId, {
+    inMemoryStore.getInstance().add(data.conversationId, {
         role: Role.assistant,
         content: message
     })
 
-    if (!data.conversationId) {
+    const conversations = await prismaClient.conversation.findUnique({
+        where: {
+            id: data.conversationId
+        }
+    })
+    if (!conversations) {
         await prismaClient.conversation.create({
             data: {
                 title: data.message.slice(0, 20) + '...',
-                id: conversationId,
+                id: data.conversationId,
                 userId,
             }
         })
@@ -114,12 +124,12 @@ router.post('/chat', authMiddleware, async (req, res) => {
     await prismaClient.message.createMany({
         data: [
             {
-                conversationId,
+                conversationId: data.conversationId,
                 content: data.message,
                 role: Role.user
             },
             {
-                conversationId,
+                conversationId: data.conversationId,
                 content: message,
                 role: Role.assistant
             }

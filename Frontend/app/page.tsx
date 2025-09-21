@@ -1,58 +1,23 @@
 "use client"
-import { useEffect } from "react";
 
-const BACKEND_URL = 'http://localhost:5000'
+import { useEffect, useState } from "react";
+import ChatPage from "./chat/page";
+import UnsignedChatPage from "./notSignedChat/page";
 
 export default function Home() {
 
+  const [isSignedIn, setIsSignedIn] = useState(false);
+
   useEffect(() => {
-
-    const makeRequest = async () => {
-      const response = await fetch(`${BACKEND_URL}/chat`, {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/json'
-        },
-        body: JSON.stringify({
-          'message': 'What is 2 + 2 just write the answer',
-          'model': 'deepseek/deepseek-chat-v3.1:free'
-        })
-      })
-
-      if (!response.body) {
-        console.error('No response body')
-        return
-      }
-
-      const reader = response.body.getReader()
-      const decoder = new TextDecoder();
-
-      try {
-        while (true) {
-          const { done, value } = await reader.read();
-
-          if (done) {
-            console.log('Stream finished')
-            break;
-          }
-
-          const chunk = decoder.decode(value, { stream: true })
-          console.log('Received chunk:', chunk)
-
-        }
-      } catch (error) {
-        console.error('Error reading stream:', error)
-      }
-      finally {
-        reader.releaseLock()
-      }
+    const token = localStorage.getItem("token");
+    if (token) {
+      setIsSignedIn(true);
+    } else {
+      setIsSignedIn(false);
     }
-    makeRequest();
-  }, [])
+  }, []);
 
   return (
-    <div className="">
-      Hi
-    </div>
+    isSignedIn ? (<ChatPage setIsSignedIn={setIsSignedIn} />) : (<UnsignedChatPage />)
   );
 }

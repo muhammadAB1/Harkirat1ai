@@ -3,7 +3,7 @@ import axios from 'axios'
 export async function sendEmail(to: string, subject: string, body: string) {
     let data = JSON.stringify({
         "From": process.env.FROM_EMAIL,
-        "To": "receiver@example.com",
+        "To": to,
         "Subject": subject,
         "TextBody": body,
         "HtmlBody": body,
