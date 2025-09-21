@@ -1,5 +1,6 @@
 export const Chat = async (
     message: string,
+    model: string,
     conversationId?: string,
     onChunk?: (chunk: string, id: string) => void,
 ) => {
@@ -12,7 +13,7 @@ export const Chat = async (
         },
         body: JSON.stringify({
             'message': message,
-            'model': 'openai/gpt-oss-20b:free',
+            'model': model,
             ...(conversationId && conversationId.length > 0 ? { 'conversationId': conversationId } : { 'conversationId': id })
         }),
     })

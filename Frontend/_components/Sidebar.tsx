@@ -1,8 +1,11 @@
+'use client'
+
 import { Button } from '@/components/ui/button'
 import { allChats } from '@/componentsHooks/Sidebar'
 import { Chat, messages } from '@/types'
 import React, { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { jwtDecode } from 'jwt-decode'
+import router from 'next/router'
 
 
 type TokenPayload = {
@@ -20,6 +23,12 @@ const Sidebar = ({ setConversationId, setNewChat, setMessages, setIsSignedIn }: 
     }
     chats();
   }, [])
+
+  const handleClick = async () => {
+    try {
+      localStorage.removeItem('token')
+    } catch { }
+  }
 
   useEffect(() => {
     try {
@@ -66,7 +75,10 @@ const Sidebar = ({ setConversationId, setNewChat, setMessages, setIsSignedIn }: 
       {/* Logout and User Info */}
       <div className="mt-auto flex items-center justify-between gap-2">
         <span className="text-sm font-medium text-zinc-200">{username}</span>
-        <Button variant="destructive" size="sm" onClick={() => { setIsSignedIn(false); try { localStorage.removeItem('token') } catch { } }}>
+        <Button variant="destructive" size="sm" onClick={() => {
+          handleClick();
+          window.location.href = "/signin";
+        }}>
           Logout
         </Button>
       </div>

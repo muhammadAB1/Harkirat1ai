@@ -6,13 +6,14 @@ import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { allMessages } from "@/componentsHooks/MessagesHooks";
-import { messages } from "@/types";
+import { messages, SUPPORTER_MODELS } from "@/types";
 
 export default function ChatPage({ setIsSignedIn }: { setIsSignedIn: Dispatch<SetStateAction<boolean>> }) {
     const [conversationId, setConversationId] = useState('')
     const [newChat, setNewChat] = useState(false)
     const [messages, setMessages] = useState<messages>()
     const [inputValue, setInputValue] = useState('')
+    const [model, setModel] = useState('openai/gpt-oss-20b:free')
 
     useEffect(() => {
         const messages = async () => {
@@ -35,7 +36,7 @@ export default function ChatPage({ setIsSignedIn }: { setIsSignedIn: Dispatch<Se
         ]));
         const input = inputValue
         setInputValue('')
-        await Chat(input, conversationId, (chunk: string, id: string) => {
+        await Chat(input, model, conversationId, (chunk: string, id: string) => {
             setConversationId(id)
             setMessages((prev) => {
                 if (!prev || prev.length === 0) return prev;
@@ -57,6 +58,24 @@ export default function ChatPage({ setIsSignedIn }: { setIsSignedIn: Dispatch<Se
                 <Sidebar setConversationId={setConversationId} setNewChat={setNewChat} setMessages={setMessages} setIsSignedIn={setIsSignedIn} />
             </div>
             <div className="w-full flex flex-col justify-between">
+
+                {(messages || newChat) && <>
+                    <label>models</label>
+                    <select
+                        className="border rounded px-2 py-1 w-[10%] bg-zinc-800 text-white"
+                        value={model} // controlled select with current model value
+                        onChange={(e) => setModel(e.target.value)} // handle change here
+                    >
+                        {SUPPORTER_MODELS.map(modelOption => (
+                            <option key={modelOption} value={modelOption}>
+                                {modelOption}
+                            </option>
+                        ))}
+                    </select>
+                </>
+                }
+
+
                 <div className="w-full h-full items-center p-8 overflow-y-scroll">
                     {
                         <MessageWindow newChat={newChat} messages={messages!} />

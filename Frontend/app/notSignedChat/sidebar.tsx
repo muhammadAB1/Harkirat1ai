@@ -15,9 +15,6 @@ const Sidebar = () => {
                 </Button>
             </div>
 
-            {/* Previous Chats List */}
-
-            {/* Logout and User Info */}
             <div className="mt-auto flex items-center justify-between gap-2 w-full">
                 <Button
                     className='w-full'

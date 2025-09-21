@@ -24,3 +24,5 @@ export type messages = Array<{
     content: string;
     role: string;
 }>
+
+export const SUPPORTER_MODELS = ['openai/gpt-oss-20b:free', 'google/gemini-2.0-flash-exp:free', 'deepseek/deepseek-chat-v3.1:free'];

@@ -1,6 +1,5 @@
-import { allMessages } from '@/componentsHooks/MessagesHooks'
 import { messages } from '@/types'
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 
 const MessageWindow = ({ newChat, messages }: { newChat: boolean, messages: messages }) => {
     return (
